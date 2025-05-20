@@ -24,78 +24,35 @@ class GraphEdge:
 class DynamicGraph:
 
     def __init__(self, num_nodes):
-        """
-        Args:
-            num_nodes = Number of Nodes in the Graph
-        """
         self.num_nodes = num_nodes
-        self.Graph = PyGraph()
-        self.Graph.add_nodes_from(GraphNode(i) for i in range(num_nodes))
+        self.DGraph = PyGraph()
+        self.DGraph.add_nodes_from(range(num_nodes))
 
-    def AssignDynamicWeights(self, Weights):
-        """
-        Args:
-            WeightFunctions = 2D (Node indexes) list containing the Edge weights as a 
-                            function of time.
-        """
-        print(Weights.shape)
-        for i in range(self.num_nodes):
-            for j in range(self.num_nodes):
-                self.Graph.add_edge(i, j, GraphEdge(Weights[i, j, :]))
+    def AssignDynamicWeights(self, dynamic_weights):
+        for indexes, weights in dynamic_weights.items():
+            ia, ib = indexes
+            self.DGraph.add_edge(ia, ib, weights)
 
-    def convert_to_two_dims(self, x):
-        return (x//self.num_nodes), (x % self.num_nodes)
+    def convert_to_two(self, ind):
+        return (ind // self.num_nodes), (ind % self.num_nodes)
 
-    def convert_to_single(self, i, t):
-        return (self.num_nodes * i) + t
-
-    def zero_Qcondition(self, a, b):
-        ia, ta = self.convert_to_two_dims(a)
-        ib, tb = self.convert_to_two_dims(b)
-        return self.Graph.get_edge_data(ia, ib)[ta] if (tb - ta == 1) else 0
-
-    def first_Qcondition(self, a, b):
-        ia, ta = self.convert_to_two_dims(a)
-        ib, tb = self.convert_to_two_dims(b)
-        if (ta != tb):
-            return 0
-        elif (ia == ib):
-            return 1
-        else:
-            return 2
-
-    def second_Qcondition(self, a, b):
-        ia, ta = self.convert_to_two_dims(a)
-        ib, tb = self.convert_to_two_dims(b)
-        if (ia != ib):
-            return 0
-        elif (ta == tb):
-            return 1
-        else:
-            return 2
-
-    def ConvertToQUBO(self, Scaling: int):
-        Q = np.zeros((self.num_nodes**2, self.num_nodes**2), dtype=np.float32)
-        c = np.ones((self.num_nodes)**2)
+    def GenerateQUBO(self, scalar=1e6):
+        Q = np.zeros((self.num_nodes**2, self.num_nodes**2))
 
         for a in range(self.num_nodes**2):
-            for b in range(a, self.num_nodes**2):
-                # print(f"a: {a} and b: {b}")
-                ia, ta = self.convert_to_two_dims(a)
-                ib, tb = self.convert_to_two_dims(b)
-                S = self.Graph.get_edge_data(ia, ib)[ta] if tb - ta == 1 else 0
-                S += 2*Scaling if (ib != ia and ta == tb) else 0
-                S += 2*Scaling if (ib == ia and ta != tb) else 0
-                Q[a, b] = S
-
-        c = -2*Scaling*c
-        return Q, c
-                
-
-
-
-
-
+            for b in range(self.num_nodes**2):
+                ia, ta = self.convert_to_two(a)
+                ib, tb = self.convert_to_two(b)
+                if a == b:
+                    Q[a][b] -= 2*scalar
+                if tb - ta == 1 and (ia, ib) in self.DGraph.edge_list():
+                    Q[a][b] += self.DGraph.get_edge_data(ia, ib)[ta]
+                if tb != ta and ia == ib:
+                    Q[a][b] += 2*scalar
+                if ia != ib and ta == tb:
+                    Q[a][b] += 2*scalar
+        return Q, 2*scalar*self.num_nodes
+            
 
 
 
@@ -105,5 +62,3 @@ class DynamicGraph:
 
 
         
-
-

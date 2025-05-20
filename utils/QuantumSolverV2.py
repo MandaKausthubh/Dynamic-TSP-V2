@@ -15,25 +15,30 @@ import numpy as np
 
 
 class QuantumQUBOSolver__V2():
-    def __init__(self, Q:np.ndarray, c:np.ndarray):
+    def __init__(self, Q:np.ndarray, v:np.ndarray = None, c = None):
         self.QUBO = QuadraticProgram()
         self.__dim__ = Q.shape[0]
+
+        if v is None:
+            v = np.zeros((self.__dim__))
+        if c is None:
+            c = 0.0
 
         # Adding the variables
         for i in range(Q.shape[0]):
             self.QUBO.binary_var(f"x{i}")
 
         # Extracting Linear and Quadratic Terms
-        linear = [c[i] + Q[i, i] for i in range(Q.shape[0])]
+        linear = [v[i] + Q[i, i] for i in range(Q.shape[0])]
         Quadratic_Dict = {
             (f"x{i}", f"x{j}") : Q[i,j] + Q[j,i] for i in range(Q.shape[0]) for j in range(i+1, Q.shape[0])
         }
-        self.QUBO.minimize(linear=linear, quadratic=Quadratic_Dict)
+        self.QUBO.minimize(linear=linear, quadratic=Quadratic_Dict, constant=c)
 
     def inspectQUBO(self):
         print(self.QUBO.prettyprint())
 
-    def solve(self, reps=5, verbose=True):
+    def solve(self, reps=15, verbose=True):
         algorithm_globals.random_seed = 10598
         qaoa_mes = QAOA(sampler=Sampler(), optimizer=COBYLA(), initial_point=[0.0]*(2*reps), reps=reps)
         qaoa = MinimumEigenOptimizer(qaoa_mes)
