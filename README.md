@@ -9,12 +9,9 @@
 * [Dynamic Extension](#dynamic-extension)
 * [Implementation](#implementation)
 * [Installation](#installation)
-* [Usage](#usage)
-* [Examples](#examples)
-* [Results](#results)
 * [Citation](#citation)
 * [Contributing](#contributing)
-* [License](#license)
+
 
 ## Background
 
@@ -86,11 +83,8 @@ If you use this work, please cite:
 ```bibtex
 @article{yourname2025dtspsol,
   title   = {Dynamic TSP via QUBO Formulation for Quantum Annealers},
-  author  = {Your Name and Collaborators},
-  journal = {Quantum Computing Journal},
+  author  = {Manda Kausthubh and Aaryan Ajith Dev},
   year    = {2025},
-  volume  = {X},
-  pages   = {Y--Z},
   doi     = {10.1234/qcj.2025.001}
 }
 ```
