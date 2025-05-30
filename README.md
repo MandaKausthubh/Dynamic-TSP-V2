@@ -81,7 +81,7 @@ pip install -r requirements.txt
 If you use this work, please cite:
 
 ```bibtex
-@article{yourname2025dtspsol,
+@article{MandaKausthubh2025dtspsol,
   title   = {Dynamic TSP via QUBO Formulation for Quantum Annealers},
   author  = {Manda Kausthubh and Aaryan Ajith Dev},
   year    = {2025},
